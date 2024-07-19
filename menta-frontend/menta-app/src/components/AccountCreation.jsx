@@ -3,10 +3,13 @@ import NavBar from './NavBar';
 
 function AccountCreation() {
   const [formData, setFormData] = useState({
-    username: '',
+    first_name: '',
+    last_name: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    dob: '',
+    interests: ''
   });
 
   const handleChange = (e) => {
@@ -16,10 +19,41 @@ function AccountCreation() {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // CREATION LOGIC HERE 
-    console.log('Form submitted', formData);
+    if (formData.password !== formData.confirmPassword) {
+      alert("Passwords do not match");
+      return;
+    }
+
+    const userData = {
+      first_name: formData.first_name,
+      last_name: formData.last_name,
+      email: formData.email,
+      password: formData.password,
+      dob: formData.dob,
+      interests: formData.interests
+    };
+
+    try {
+      const response = await fetch('http://127.0.0.1:8000/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      });
+
+      if (response.ok) {
+        alert('Account created successfully');
+        window.location.href = '/login';
+      } else {
+        alert('Error creating account');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error creating account');
+    }
   };
 
   return (
@@ -30,11 +64,22 @@ function AccountCreation() {
           <h2 className="text-2xl font-bold mb-6 text-center">Create an Account</h2>
           <form onSubmit={handleSubmit}>
             <div className="mb-4">
-              <label className="block text-gray-700">Username</label>
+              <label className="block text-gray-700">First Name</label>
               <input
                 type="text"
-                name="username"
-                value={formData.username}
+                name="first_name"
+                value={formData.first_name}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border rounded"
+                required
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700">Last Name</label>
+              <input
+                type="text"
+                name="last_name"
+                value={formData.last_name}
                 onChange={handleChange}
                 className="w-full px-3 py-2 border rounded"
                 required
@@ -68,6 +113,28 @@ function AccountCreation() {
                 type="password"
                 name="confirmPassword"
                 value={formData.confirmPassword}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border rounded"
+                required
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700">Date of Birth</label>
+              <input
+                type="date"
+                name="dob"
+                value={formData.dob}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border rounded"
+                required
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700">Interests</label>
+              <input
+                type="text"
+                name="interests"
+                value={formData.interests}
                 onChange={handleChange}
                 className="w-full px-3 py-2 border rounded"
                 required

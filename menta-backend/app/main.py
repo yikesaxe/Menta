@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
 from app.schemas import UserCreate, UserOut, Token
 from app.crud import create_user, authenticate_user
@@ -7,6 +8,20 @@ from app.utils import get_user_by_email
 from datetime import timedelta
 
 app = FastAPI()
+
+# Set up CORS middleware
+origins = [
+    "http://localhost:3000",  # React app runs on port 3000 by default
+    "http://localhost:5173",  # Vite app runs on port 5173 by default
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.post("/register", response_model=UserOut)
 async def register_user(user: UserCreate):

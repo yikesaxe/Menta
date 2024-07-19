@@ -14,10 +14,33 @@ function LoginPage() {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    //LOGIN SUBMISSION LOGIC
-    console.log('Login form submitted', formData);
+
+    try {
+      const response = await fetch('http://127.0.0.1:8000/token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          username: formData.email,
+          password: formData.password,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem('token', data.access_token);
+        alert('Login successful');
+        window.location.href = '/feed';
+      } else {
+        alert('Error logging in');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error logging in');
+    }
   };
 
   return (

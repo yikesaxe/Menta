@@ -1,7 +1,14 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import FeedNavBar from './FeedNavBar';
 
 function FeedPage() {
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      window.location.href = '/login';
+    }
+  }, []);
+
   return (
     <div>
       <FeedNavBar />
