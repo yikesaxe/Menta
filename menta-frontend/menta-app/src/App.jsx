@@ -1,12 +1,19 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './index.css'
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import HomePage from './components/HomePage';
+import AccountCreation from './components/AccountCreation';
+import LoginPage from './components/LoginPage';
 
-export default function App() {
+function App() {
   return (
-    <h1 className="text-red-400 font-bold underline">
-      Menta!
-    </h1>
-  )
+    <Router>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/signup" element={<AccountCreation />} />
+        <Route path="/login" element={<LoginPage />} />
+      </Routes>
+    </Router>
+  );
 }
+
+export default App;
