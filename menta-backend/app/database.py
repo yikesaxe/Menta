@@ -4,7 +4,12 @@ from decouple import config
 
 MONGO_DETAILS = config("MONGO_DETAILS")
 
-client = motor.motor_asyncio.AsyncIOMotorClient(MONGO_DETAILS)
+client = motor.motor_asyncio.AsyncIOMotorClient(
+    MONGO_DETAILS,
+    serverSelectionTimeoutMS=50000,  # 50 seconds
+    socketTimeoutMS=50000,  # 50 seconds
+    connectTimeoutMS=50000,  # 50 seconds
+)
 database = client["menta"]
 
 user_collection = database.get_collection("users")

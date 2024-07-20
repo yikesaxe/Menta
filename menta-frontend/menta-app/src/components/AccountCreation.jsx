@@ -12,6 +12,9 @@ function AccountCreation() {
     interests: ''
   });
 
+  const [emailErrorMessage, setEmailErrorMessage] = useState('');
+  const [otherErrorMessage, setOtherErrorMessage] = useState('');
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -21,8 +24,10 @@ function AccountCreation() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setEmailErrorMessage('');
+    setOtherErrorMessage('');
     if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match");
+      setOtherErrorMessage("Passwords do not match");
       return;
     }
 
@@ -48,11 +53,16 @@ function AccountCreation() {
         alert('Account created successfully');
         window.location.href = '/login';
       } else {
-        alert('Error creating account');
+        const errorData = await response.json();
+        if (errorData.detail === "Email already registered") {
+          setEmailErrorMessage("This email address is already taken");
+        } else {
+          setOtherErrorMessage(errorData.detail || 'Error creating account');
+        }
       }
     } catch (error) {
       console.error('Error:', error);
-      alert('Error creating account');
+      setOtherErrorMessage('Error creating account');
     }
   };
 
@@ -62,6 +72,7 @@ function AccountCreation() {
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="bg-white p-8 rounded shadow-md w-full max-w-md">
           <h2 className="text-2xl font-bold mb-6 text-center">Create an Account</h2>
+          {otherErrorMessage && <p className="text-red-500 mb-4">{otherErrorMessage}</p>}
           <form onSubmit={handleSubmit}>
             <div className="mb-4">
               <label className="block text-gray-700">First Name</label>
@@ -92,9 +103,10 @@ function AccountCreation() {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border rounded"
+                className={`w-full px-3 py-2 border rounded ${emailErrorMessage ? 'border-red-500' : ''}`}
                 required
               />
+              {emailErrorMessage && <p className="text-red-500 mt-1">{emailErrorMessage}</p>}
             </div>
             <div className="mb-4">
               <label className="block text-gray-700">Password</label>
