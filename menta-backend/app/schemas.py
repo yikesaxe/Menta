@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr
-from typing import Optional
+from typing import Optional, List
 
 class UserCreate(BaseModel):
     first_name: str
@@ -7,7 +7,7 @@ class UserCreate(BaseModel):
     email: EmailStr
     password: str
     dob: str
-    interests: str
+    interests: List[str]  
     profile_picture: Optional[str]
     location: Optional[str]
     bio: Optional[str]
@@ -18,7 +18,7 @@ class UserOut(BaseModel):
     last_name: str
     email: EmailStr
     dob: str
-    interests: str
+    interests: List[str] 
     profile_picture: Optional[str]
     location: Optional[str]
     bio: Optional[str]

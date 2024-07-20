@@ -1,3 +1,6 @@
+@import '@fontsource/inter/index.css'; /* Add this line if using npm package */
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
