@@ -9,7 +9,15 @@ export default {
       fontFamily: {
         inter: ['Inter', 'sans-serif'],
       },
+      spacing: {
+        '76': '18.5rem',
+        '50': '12.5rem',
+        '18':'4.5rem',
+        '23':'5.75rem',
+      }
     },
   },
-  plugins: [],
+  plugins: [
+    require('@tailwindcss/typography'),
+  ],
 };
