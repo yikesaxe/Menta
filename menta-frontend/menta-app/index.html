@@ -1,13 +1,101 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Menta</title>
-  <link rel="stylesheet" href="/src/index.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menta</title>
+    <link rel="stylesheet" href="/src/index.css">
+    <style>
+        /* Set the size of the map */
+        #map {
+            height: 100%;
+        }
+        /* Make the page full height */
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+    </style>
 </head>
 <body>
-  <div id="root"></div>
-  <script type="module" src="/src/main.jsx"></script>
+    <!-- The div element for the map -->
+    <div id="map"></div>
+
+    <script>
+        // Initialize and add the map
+        function initMap() {
+            // The map, centered at a default location
+            var map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 10,
+                center: {lat: 40.7128, lng: -74.0060} // Default to New York City
+            });
+
+            // Try HTML5 geolocation.
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    var pos = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+
+                    // Center the map on the user's location
+                    map.setCenter(pos);
+
+                    // Add a marker at the user's location
+                    var marker = new google.maps.Marker({
+                        position: pos,
+                        map: map
+                    });
+
+                    // Use PlacesService to find nearby parks and libraries
+                    var service = new google.maps.places.PlacesService(map);
+                    var request = {
+                        location: pos,
+                        radius: '5000', // 5 km radius
+                        type: ['park', 'library']
+                    };
+
+                    service.nearbySearch(request, function(results, status) {
+                        if (status === google.maps.places.PlacesServiceStatus.OK) {
+                            for (var i = 0; i < results.length; i++) {
+                                createMarker(results[i]);
+                            }
+                        }
+                    });
+                }, function() {
+                    handleLocationError(true, map.getCenter());
+                });
+            } else {
+                // Browser doesn't support Geolocation
+                handleLocationError(false, map.getCenter());
+            }
+
+            function createMarker(place) {
+                var marker = new google.maps.Marker({
+                    map: map,
+                    position: place.geometry.location,
+                    title: place.name
+                });
+
+                var infowindow = new google.maps.InfoWindow();
+                google.maps.event.addListener(marker, 'click', function() {
+                    infowindow.setContent(place.name);
+                    infowindow.open(map, this);
+                });
+            }
+        }
+
+        function handleLocationError(browserHasGeolocation, pos) {
+            console.log(browserHasGeolocation ? 
+                        'Error: The Geolocation service failed.' : 
+                        'Error: Your browser doesn\'t support geolocation.');
+        }
+    </script>
+
+    <!-- Load the Google Maps and Places API -->
+    <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places&callback=initMap">
+    </script>
 </body>
 </html>
