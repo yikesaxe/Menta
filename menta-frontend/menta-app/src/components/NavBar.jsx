@@ -19,6 +19,8 @@ function NavBar() {
   const handleLogout = () => {
     logout();
     navigate('/');
+    setIsProfileDropdownOpen(false);
+    setIsMouseInsideProfileDropdown(false);
   };
 
   const buttonStyles = "px-3 py-1 rounded font-normal font-inter transition-colors duration-200 text-sm";
@@ -58,7 +60,7 @@ function NavBar() {
   };
 
   return (
-    <nav className="bg-white p-4 shadow relative z-10">
+    <nav className="bg-white p-4 shadow fixed top-0 left-0 w-full z-10">
       <div className="container mx-auto flex justify-between items-center">
         <div className="flex items-center space-x-8">
           <Link to="/" className={`text-blue-500 text-2xl font-bold ${getActiveClass('/')}`}>MENTA</Link>
@@ -204,6 +206,3 @@ function NavBar() {
 }
 
 export default NavBar;
-
-
-

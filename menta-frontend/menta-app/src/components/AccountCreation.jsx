@@ -172,7 +172,7 @@ function AccountCreation() {
               </div>
               <button
                 type="submit"
-                className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
+                className="w-full bg-blue-500 text-white py-2 rounded-3xl hover:bg-blue-600"
               >
                 Next
               </button>
@@ -257,7 +257,7 @@ function AccountCreation() {
               <button
                 type="button"
                 onClick={handleNextStep}
-                className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
+                className="w-full bg-blue-500 text-white py-2 rounded-3xl hover:bg-blue-600"
               >
                 Next
               </button>
@@ -290,7 +290,7 @@ function AccountCreation() {
               </div>
               <button
                 type="submit"
-                className={`w-full py-2 rounded ${
+                className={`w-full py-2 rounded-3xl${
                   formData.interests.length >= 5 ? 'bg-blue-500 text-white hover:bg-blue-600' : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                 }`}
                 disabled={formData.interests.length < 5}
