@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException, logger, status
+from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
 from datetime import timedelta
@@ -10,15 +10,16 @@ from app.auth import create_access_token, get_current_user
 from app.utils import get_user_by_email
 from decouple import config
 
-# Define the token expiration time
-ACCESS_TOKEN_EXPIRE_MINUTES = 30  # 30 minutes
+import requests
+import logging
+
+ACCESS_TOKEN_EXPIRE_MINUTES = 30  
 
 app = FastAPI()
 
-# Set up CORS middleware
 origins = [
-    "http://localhost:3000",  # React app runs on port 3000 by default
-    "http://localhost:5173",  # Vite app runs on port 5173 by default
+    "http://localhost:3000",  
+    "http://localhost:5173",  
 ]
 
 app.add_middleware(
@@ -29,9 +30,48 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# New endpoint for checking if an email is already registered
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
 class EmailCheckRequest(BaseModel):
     email: str
+
+class StudySpotsRequest(BaseModel):
+    lat: float
+    lon: float
+    radius: int = 1000  
+
+def fetch_osm_data(query: str):
+    url = "http://overpass-api.de/api/interpreter"
+    response = requests.get(url, params={'data': query})
+    response.raise_for_status()
+    return response.json()
+
+@app.post("/api/study_spots")
+async def study_spots(request: StudySpotsRequest):
+    lat = request.lat
+    lon = request.lon
+    radius = request.radius
+
+    query = f"""
+    [out:json];
+    (
+      node["amenity"="cafe"](around:{radius},{lat},{lon});
+      node["amenity"="library"](around:{radius},{lat},{lon});
+    );
+    out body;
+    """
+    try:
+        logger.debug(f"Fetching OSM data with query: {query}")
+        data = fetch_osm_data(query)
+        logger.debug(f"Received OSM data: {data}")
+        return data
+    except requests.RequestException as e:
+        logger.error(f"RequestException in study_spots: {e}")
+        raise HTTPException(status_code=500, detail="Internal Server Error: Unable to fetch data from Overpass API")
+    except Exception as e:
+        logger.error(f"Exception in study_spots: {e}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
 
 @app.post("/check-email")
 async def check_email(email_check: EmailCheckRequest):
@@ -41,7 +81,6 @@ async def check_email(email_check: EmailCheckRequest):
             raise HTTPException(status_code=400, detail="Email already registered")
         return {"message": "Email is available"}
     except HTTPException as e:
-        # Reraise the HTTPException to ensure correct status code is sent
         raise e
     except Exception as e:
         logger.error(f"Error in check_email: {e}")
@@ -55,8 +94,7 @@ async def register_user(user: UserCreate):
             raise HTTPException(status_code=400, detail="Email already registered")
         new_user = await create_user(user.dict())
         return new_user
-    except HTTPException as e:
-        # Reraise the HTTPException to ensure correct status code is sent
+    except HTTPException as e:      
         raise e
     except Exception as e:
         logger.error(f"Error in register_user: {e}")
