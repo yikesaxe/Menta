@@ -1,14 +1,16 @@
 import motor.motor_asyncio
 from bson import ObjectId
 from decouple import config
+import certifi
 
 MONGO_DETAILS = config("MONGO_DETAILS")
 
 client = motor.motor_asyncio.AsyncIOMotorClient(
     MONGO_DETAILS,
-    serverSelectionTimeoutMS=50000,  # 50 seconds
-    socketTimeoutMS=50000,  # 50 seconds
-    connectTimeoutMS=50000,  # 50 seconds
+    serverSelectionTimeoutMS=50000, 
+    socketTimeoutMS=50000, 
+    connectTimeoutMS=50000,  
+    tlsCAFile=certifi.where() 
 )
 database = client["menta"]
 
@@ -20,11 +22,11 @@ def user_helper(user) -> dict:
         "first_name": user["first_name"],
         "last_name": user["last_name"],
         "email": user["email"],
-        "dob": user.get("dob"),  # Use get to avoid KeyError if field is missing
+        "dob": user.get("dob"),  
         "interests": user["interests"],
-        "profile_picture": user.get("profile_picture"),  # Use get to avoid KeyError if field is missing
-        "location": user.get("location"),  # Use get to avoid KeyError if field is missing
-        "bio": user.get("bio"),  # Use get to avoid KeyError if field is missing
+        "profile_picture": user.get("profile_picture"), 
+        "location": user.get("location"), 
+        "bio": user.get("bio"),  
         "hashed_password": user["hashed_password"],
         "created_at": user["created_at"],
         "updated_at": user["updated_at"],
