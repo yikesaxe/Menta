@@ -6,8 +6,16 @@ export default {
   ],
   theme: {
     extend: {
+      fontSize: {
+        '35xl': ['2rem',{
+          lineHeight: '2.563rem',
+          letterSpacing: '-0.01em',
+          fontWeight: '600'
+        }],
+      },
       fontFamily: {
         inter: ['Inter', 'sans-serif'],
+        outfit: ['Outfit', 'sans-serif'],
       },
       spacing: {
         '76': '18.5rem',
@@ -19,5 +27,6 @@ export default {
   },
   plugins: [
     require('@tailwindcss/typography'),
+    require('@tailwindcss/forms'),
   ],
 };
