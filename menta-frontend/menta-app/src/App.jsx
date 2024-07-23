@@ -7,6 +7,7 @@ import FeedPage from './components/FeedPage';
 import NavBar from './components/NavBar';
 import { AuthProvider } from './components/AuthContext';
 import UploadActivity from './components/UploadActivity';
+import Map from './components/Map';
 
 function App() {
   return (
@@ -19,6 +20,8 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/feed" element={<FeedPage />} />
           <Route path="/upload-activity" element={<UploadActivity />} />
+          <Route path="/maps" element={<Map />} />
+          
         </Routes>
       </Router>
     </AuthProvider>
