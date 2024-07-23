@@ -12,6 +12,7 @@ function NavBar() {
           <Link to="/login" className="text-white">Login</Link>
           <Link to="/feed" className="text-white">Feed</Link>
           <Link to="/profile" className="text-white">Profile</Link>
+          <Link to="/settings" className="text-white">Settings</Link>
         </div>
       </div>
     </nav>
