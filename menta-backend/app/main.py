@@ -16,8 +16,8 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30  # 30 minutes
 app = FastAPI()
 
 origins = [
-    "http://localhost:3000",  # React app runs on port 3000 by default
-    "http://localhost:5173",  # Vite app runs on port 5173 by default
+    "http://localhost:3000",  
+    "http://localhost:5173",  
 ]
 
 app.add_middleware(
@@ -34,6 +34,43 @@ logger.setLevel(logging.ERROR)
 
 class EmailCheckRequest(BaseModel):
     email: str
+
+class StudySpotsRequest(BaseModel):
+    lat: float
+    lon: float
+    radius: int = 1000  
+
+def fetch_osm_data(query: str):
+    url = "http://overpass-api.de/api/interpreter"
+    response = requests.get(url, params={'data': query})
+    response.raise_for_status()
+    return response.json()
+
+@app.post("/api/study_spots")
+async def study_spots(request: StudySpotsRequest):
+    lat = request.lat
+    lon = request.lon
+    radius = request.radius
+
+    query = f"""
+    [out:json];
+    (
+      node["amenity"="cafe"](around:{radius},{lat},{lon});
+      node["amenity"="library"](around:{radius},{lat},{lon});
+    );
+    out body;
+    """
+    try:
+        logger.debug(f"Fetching OSM data with query: {query}")
+        data = fetch_osm_data(query)
+        logger.debug(f"Received OSM data: {data}")
+        return data
+    except requests.RequestException as e:
+        logger.error(f"RequestException in study_spots: {e}")
+        raise HTTPException(status_code=500, detail="Internal Server Error: Unable to fetch data from Overpass API")
+    except Exception as e:
+        logger.error(f"Exception in study_spots: {e}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
 
 @app.post("/check-email")
 async def check_email(email_check: EmailCheckRequest):
