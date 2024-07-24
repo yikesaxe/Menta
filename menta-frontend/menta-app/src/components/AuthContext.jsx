@@ -10,20 +10,23 @@ export const AuthProvider = ({ children }) => {
     const token = localStorage.getItem('token');
     if (token) {
       setIsLoggedIn(true);
-      // Fetch and set user data here if needed
       fetchUserData(token);
     }
   }, []);
 
   const fetchUserData = async (token) => {
-    const response = await fetch('http://127.0.0.1:8000/users/me', {
-      headers: {
-        'Authorization': `Bearer ${token}`
+    try {
+      const response = await fetch('http://127.0.0.1:8000/users/me', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setUser(data);
       }
-    });
-    if (response.ok) {
-      const data = await response.json();
-      setUser(data);
+    } catch (error) {
+      console.error('Failed to fetch user data:', error);
     }
   };
 
@@ -39,8 +42,12 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  const getToken = () => {
+    return localStorage.getItem('token');
+  };
+
   return (
-    <AuthContext.Provider value={{ isLoggedIn, login, logout, user }}>
+    <AuthContext.Provider value={{ isLoggedIn, login, logout, user, getToken }}>
       {children}
     </AuthContext.Provider>
   );

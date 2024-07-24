@@ -6,6 +6,9 @@ export default {
   ],
   theme: {
     extend: {
+      colors: {
+        'website': '#f3f2f0',
+      },
       fontSize: {
         '35xl': ['2rem',{
           lineHeight: '2.563rem',
@@ -22,6 +25,8 @@ export default {
         '50': '12.5rem',
         '18':'4.5rem',
         '23':'5.75rem',
+        '22':'5.5rem',
+        '34':'8.5rem',
       }
     },
   },

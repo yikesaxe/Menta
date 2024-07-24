@@ -7,6 +7,8 @@ import FeedPage from './components/FeedPage';
 import NavBar from './components/NavBar';
 import { AuthProvider } from './components/AuthContext';
 import UploadActivity from './components/UploadActivity';
+import Profile from './components/Profile';
+import SettingsPage from './components/Settings';
 
 function App() {
   return (
@@ -19,6 +21,9 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/feed" element={<FeedPage />} />
           <Route path="/upload-activity" element={<UploadActivity />} />
+          <Route path="/maps" element={<UploadActivity />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/settings" element={<SettingsPage />} />
         </Routes>
       </Router>
     </AuthProvider>

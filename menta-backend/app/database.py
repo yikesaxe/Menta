@@ -13,6 +13,7 @@ client = motor.motor_asyncio.AsyncIOMotorClient(
 database = client["menta"]
 
 user_collection = database.get_collection("users")
+activity_collection = database.get_collection("activities")
 
 def user_helper(user) -> dict:
     return {
@@ -28,4 +29,23 @@ def user_helper(user) -> dict:
         "hashed_password": user["hashed_password"],
         "created_at": user["created_at"],
         "updated_at": user["updated_at"],
+    }
+
+def activity_helper(activity) -> dict:
+    return {
+        "id": str(activity["_id"]),
+        "title": activity["title"],
+        "description": activity["description"],
+        "activity": activity["activity"],
+        "date": activity["date"],
+        "start_time": activity["start_time"],
+        "end_time": activity["end_time"],
+        "duration": activity["duration"],
+        "private_notes": activity["private_notes"],
+        "privacy_type": activity["privacy_type"],
+        "perceived_performance": activity["perceived_performance"],
+        "images": activity["images"],
+        "user_id": activity["user_id"],
+        "created_at": activity["created_at"],
+        "updated_at": activity["updated_at"],
     }

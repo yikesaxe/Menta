@@ -1,6 +1,6 @@
 from bson import ObjectId
-from pydantic import BaseModel, EmailStr, Field
-from typing import Optional
+from pydantic import BaseModel, Field, EmailStr
+from typing import Optional, List
 from datetime import datetime
 
 class UserModel(BaseModel):
@@ -10,10 +10,32 @@ class UserModel(BaseModel):
     email: EmailStr
     hashed_password: str
     dob: str
-    interests: str
+    interests: List[str]
     profile_picture: Optional[str] = None
     location: Optional[str] = None
     bio: Optional[str] = None
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        allow_population_by_field_name = True
+        json_encoders = {ObjectId: str}
+        arbitrary_types_allowed = True
+
+class ActivityModel(BaseModel):
+    id: Optional[str] = Field(alias="_id")
+    title: str
+    description: str
+    activity: str
+    date: str
+    start_time: str
+    end_time: str
+    duration: int
+    private_notes: str
+    privacy_type: str
+    perceived_performance: int
+    images: List[str]
+    user_id: str
     created_at: datetime
     updated_at: datetime
 
