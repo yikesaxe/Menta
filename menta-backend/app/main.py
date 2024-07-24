@@ -2,14 +2,17 @@ from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
 from datetime import timedelta, datetime
-import logging
-
+from typing import List
 from pydantic import BaseModel
-from app.schemas import UserCreate, UserOut, Token, ActivityCreate, ActivityOut
+from app.schemas import UserCreate, UserOut, Token, ActivityCreate, ActivityOut, ProgressOut
 from app.crud import create_user, authenticate_user, create_activity
 from app.auth import create_access_token, get_current_user
 from app.utils import get_user_by_email
+from app.database import activity_collection, progress_collection, progress_helper, activity_helper
 from decouple import config
+
+import logging
+import requests
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 30  # 30 minutes
 
@@ -65,7 +68,7 @@ async def study_spots(request: StudySpotsRequest):
         data = fetch_osm_data(query)
         logger.debug(f"Received OSM data: {data}")
         return data
-    except requests.RequestException as e:
+    except requests.RequestException as e:  # Corrected exception handling
         logger.error(f"RequestException in study_spots: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error: Unable to fetch data from Overpass API")
     except Exception as e:
@@ -117,4 +120,31 @@ async def upload_activity(activity: ActivityCreate, current_user: UserOut = Depe
         return new_activity
     except Exception as e:
         logger.error(f"Error in upload_activity: {e}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+
+@app.get("/activities", response_model=List[ActivityOut])
+async def get_activities(current_user: UserOut = Depends(get_current_user)):
+    try:
+        activities = await activity_collection.find().sort("created_at", -1).to_list(100)
+        return [activity_helper(activity) for activity in activities]
+    except Exception as e:
+        logger.error(f"Error in get_activities: {e}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+    
+@app.get("/activities/user/{user_id}", response_model=List[ActivityOut])
+async def get_user_activities(user_id: str, current_user: UserOut = Depends(get_current_user)):
+    try:
+        activities = await activity_collection.find({"user_id": user_id}).sort("created_at", -1).to_list(100)
+        return [activity_helper(activity) for activity in activities]
+    except Exception as e:
+        logger.error(f"Error in get_user_activities: {e}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+
+@app.get("/progress/{user_id}", response_model=List[ProgressOut])
+async def get_user_progress(user_id: str, current_user: UserOut = Depends(get_current_user)):
+    try:
+        progress_entries = await progress_collection.find({"user_id": user_id}).to_list(100)
+        return [progress_helper(entry) for entry in progress_entries]
+    except Exception as e:
+        logger.error(f"Error in get_user_progress: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")

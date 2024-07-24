@@ -10,6 +10,7 @@ import UploadActivity from './components/UploadActivity';
 import Profile from './components/Profile';
 import SettingsPage from './components/Settings';
 import Map from './components/Map';
+import UserFeed from './components/UserFeed';
 
 function App() {
   return (
@@ -25,7 +26,7 @@ function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/maps" element={<Map />} />
-          
+          <Route path="/userfeed" element={<UserFeed />} />
         </Routes>
       </Router>
     </AuthProvider>

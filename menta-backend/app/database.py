@@ -16,6 +16,7 @@ database = client["menta"]
 
 user_collection = database.get_collection("users")
 activity_collection = database.get_collection("activities")
+progress_collection = database.get_collection("progress")
 
 def user_helper(user) -> dict:
     return {
@@ -28,6 +29,9 @@ def user_helper(user) -> dict:
         "profile_picture": user.get("profile_picture"), 
         "location": user.get("location"), 
         "bio": user.get("bio"),  
+        "clubs": user.get("clubs", []),
+        "followers": user.get("followers", []),
+        "following": user.get("following", []),
         "hashed_password": user["hashed_password"],
         "created_at": user["created_at"],
         "updated_at": user["updated_at"],
@@ -50,4 +54,17 @@ def activity_helper(activity) -> dict:
         "user_id": activity["user_id"],
         "created_at": activity["created_at"],
         "updated_at": activity["updated_at"],
+    }
+
+def progress_helper(progress) -> dict:
+    return {
+        "id": str(progress["_id"]),
+        "user_id": progress["user_id"],
+        "activity": progress["activity"],
+        "streak": progress["streak"],
+        "last_completed": progress["last_completed"],
+        "total_completed": progress["total_completed"],
+        "time_spent": progress["time_spent"],  # Time spent on this activity in minutes
+        "created_at": progress["created_at"],
+        "updated_at": progress["updated_at"],
     }

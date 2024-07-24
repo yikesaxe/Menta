@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from './AuthContext';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import ActivityCard from './ActivityCard'; 
+import ActivityCard from './ActivityCard';
 
-function FeedPage() {
+function UserFeed() {
   const { isLoggedIn, user, getToken } = useAuth();
   const navigate = useNavigate();
   const [activities, setActivities] = useState([]);
@@ -13,13 +13,13 @@ function FeedPage() {
     if (!isLoggedIn) {
       navigate('/login'); // Redirect to login if the user is not authenticated
     } else {
-      fetchActivities();
+      fetchMyActivities();
     }
   }, [isLoggedIn, navigate]);
 
-  const fetchActivities = async () => {
+  const fetchMyActivities = async () => {
     try {
-      const response = await axios.get('http://127.0.0.1:8000/activities', {
+      const response = await axios.get(`http://127.0.0.1:8000/activities/user/${user.id}`, {
         headers: {
           Authorization: `Bearer ${getToken()}`,
         },
@@ -28,13 +28,6 @@ function FeedPage() {
     } catch (error) {
       console.error('Error fetching activities:', error);
     }
-  };
-
-  const filterActivities = (activity) => {
-    if (activity.privacy_type === 'everyone') return true;
-    if (activity.privacy_type === 'followers' && user.following.includes(activity.user_id)) return true;
-    if (activity.privacy_type === 'only_you' && activity.user_id === user.id) return true;
-    return false;
   };
 
   if (!user) {
@@ -50,7 +43,7 @@ function FeedPage() {
 
       {/* Main Content */}
       <div className="flex-grow pr-2 pl-2 overflow-y-auto ml-1 mr-1">
-        {activities.filter(filterActivities).map((activity) => (
+        {activities.map((activity) => (
           <ActivityCard key={activity.id} activity={activity} />
         ))}
       </div>
@@ -63,4 +56,4 @@ function FeedPage() {
   );
 }
 
-export default FeedPage;
+export default UserFeed;

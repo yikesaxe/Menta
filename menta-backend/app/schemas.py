@@ -12,6 +12,9 @@ class UserCreate(BaseModel):
     profile_picture: Optional[str]
     location: Optional[str]
     bio: Optional[str]
+    clubs: Optional[List[str]] = []
+    followers: Optional[List[str]] = []
+    following: Optional[List[str]] = []
 
 class UserOut(BaseModel):
     id: str
@@ -23,6 +26,9 @@ class UserOut(BaseModel):
     profile_picture: Optional[str]
     location: Optional[str]
     bio: Optional[str]
+    clubs: Optional[List[str]] = []
+    followers: Optional[List[str]] = []
+    following: Optional[List[str]] = []
 
 class Token(BaseModel):
     access_token: str
@@ -57,5 +63,24 @@ class ActivityOut(BaseModel):
     perceived_performance: Optional[int]
     images: Optional[List[str]] = []
     user_id: str
+    created_at: datetime
+    updated_at: datetime
+
+class Progress(BaseModel):
+    user_id: str
+    activity: str
+    streak: int
+    last_completed: datetime
+    total_time_spent: int  # in minutes
+    created_at: datetime
+    updated_at: datetime
+
+class ProgressOut(BaseModel):
+    id: str
+    user_id: str
+    activity: str
+    streak: int
+    last_completed: datetime
+    total_time_spent: int  # in minutes
     created_at: datetime
     updated_at: datetime
