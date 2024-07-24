@@ -11,7 +11,7 @@ function UserFeed() {
 
   useEffect(() => {
     if (!isLoggedIn) {
-      navigate('/login'); // Redirect to login if the user is not authenticated
+      navigate('/login'); 
     } else {
       fetchMyActivities();
     }
@@ -31,26 +31,21 @@ function UserFeed() {
   };
 
   if (!user) {
-    return null; // or a loading indicator
+    return null; 
   }
 
   return (
     <div className="min-h-screen bg-gray-100 pt-16 flex m-1">
-      {/* Left Sidebar */}
       <div className="w-1/4 pr-2 pl-2 ml-1 mr-1">
-        {/* Content for the left sidebar */}
       </div>
 
-      {/* Main Content */}
       <div className="flex-grow pr-2 pl-2 overflow-y-auto ml-1 mr-1">
         {activities.map((activity) => (
           <ActivityCard key={activity.id} activity={activity} />
         ))}
       </div>
 
-      {/* Right Sidebar */}
       <div className="w-1/4 pr-2 pl-2 ml-1 mr-1">
-        {/* Content for the right sidebar */}
       </div>
     </div>
   );

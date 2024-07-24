@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronDown, faBook, faPen, faLaptopCode, faPuzzlePiece } from '@fortawesome/free-solid-svg-icons'; // Import icons
-import Stats from './Stats'; // Import Stats component
+import { faChevronDown, faBook, faPen, faLaptopCode, faPuzzlePiece } from '@fortawesome/free-solid-svg-icons'; 
+import Stats from './Stats'; 
 
 const Profile = () => {
   const [selectedCategory, setSelectedCategory] = useState('Activities');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  //retrieve followers from DB
-  const [followers, setFollowers] = useState(120); 
-  const [following, setFollowing] = useState(80); 
+  const [followers, setFollowers] = useState(1); 
+  const [following, setFollowing] = useState(1); 
 
   const categories = [
     { name: 'Reading', icon: faBook },
@@ -27,7 +26,6 @@ const Profile = () => {
     <div className="relative min-h-screen mt-16">
       <div className="flex p-10">
         <div className="flex flex-col items-start w-1/3">
-          {/* Retrieve photo and user's name from DB */}
           <div className="flex items-center mb-4">
             <img 
               src="https://via.placeholder.com/150" 
@@ -53,7 +51,6 @@ const Profile = () => {
 
       <div className="absolute inset-x-0 bottom-1/4 flex justify-center">
         <div className="w-screen max-w-screen-lg mx-4 bg-white border rounded-lg shadow-lg">
-          {/* Progress dropdown */}
           <div className="flex flex-col items-center p-4">
             <label htmlFor="category" className="text-lg font-medium mb-2">
               Progress Tracker:
