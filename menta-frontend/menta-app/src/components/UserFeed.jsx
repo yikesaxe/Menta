@@ -11,7 +11,7 @@ function UserFeed() {
 
   useEffect(() => {
     if (!isLoggedIn) {
-      navigate('/login'); // Redirect to login if the user is not authenticated
+      navigate('/login'); 
     } else {
       fetchMyActivities();
     }
@@ -31,7 +31,7 @@ function UserFeed() {
   };
 
   if (!user) {
-    return null; // or a loading indicator
+    return null; 
   }
 
   return (

@@ -11,23 +11,29 @@ import Profile from './components/Profile';
 import SettingsPage from './components/Settings';
 import Map from './components/Map';
 import UserFeed from './components/UserFeed';
+import Footer from './components/Footer'; 
 
 function App() {
   return (
     <AuthProvider>
       <Router>
         <NavBar />
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/signup" element={<AccountCreation />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/feed" element={<FeedPage />} />
-          <Route path="/upload-activity" element={<UploadActivity />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/settings" element={<SettingsPage />} />
-          <Route path="/maps" element={<Map />} />
-          <Route path="/userfeed" element={<UserFeed />} />
-        </Routes>
+        <div className="flex flex-col min-h-screen">
+          <div className="flex-grow">
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/signup" element={<AccountCreation />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/feed" element={<FeedPage />} />
+              <Route path="/upload-activity" element={<UploadActivity />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/settings" element={<SettingsPage />} />
+              <Route path="/maps" element={<Map />} />
+              <Route path="/userfeed" element={<UserFeed />} />
+            </Routes>
+          </div>
+          <Footer /> 
+        </div>
       </Router>
     </AuthProvider>
   );
