@@ -44,7 +44,7 @@ function SettingsPage() {
             'Content-Type': 'multipart/form-data'
           }
         });
-        updatedUser.profile_picture = profileResponse.data[0].replace(/^\/+/, ''); // Remove leading slashes
+        updatedUser.profile_picture = profileResponse.data[0]; // No need to replace leading slashes
       }
 
       if (updatedUser.cover_photo && typeof updatedUser.cover_photo !== 'string') {
@@ -56,7 +56,7 @@ function SettingsPage() {
             'Content-Type': 'multipart/form-data'
           }
         });
-        updatedUser.cover_photo = coverResponse.data[0].replace(/^\/+/, ''); // Remove leading slashes
+        updatedUser.cover_photo = coverResponse.data[0]; // No need to replace leading slashes
       }
 
       // Append all form data fields
@@ -174,7 +174,7 @@ const ProfileSection = ({ user, onUpdate }) => {
       }
     });
 
-    return response.data[0].replace(/^\/+/, ''); // Remove leading slashes
+    return response.data[0]; // No need to replace leading slashes
   };
 
   const handleSubmit = async (e) => {
@@ -240,7 +240,7 @@ const ProfileSection = ({ user, onUpdate }) => {
               <label htmlFor="profile_picture" className="block text-sm font-medium leading-6 text-gray-900">Profile Photo</label>
               <div className="mt-2 flex items-center gap-x-3">
                 {formData.profile_picture ? (
-                  <img src={typeof formData.profile_picture === 'string' ? `http://127.0.0.1:8000/${formData.profile_picture}` : URL.createObjectURL(formData.profile_picture)} alt="Profile" className="h-12 w-12 rounded-full object-cover" />
+                  <img src={typeof formData.profile_picture === 'string' ? formData.profile_picture : URL.createObjectURL(formData.profile_picture)} alt="Profile" className="h-12 w-12 rounded-full object-cover" />
                 ) : (
                   <UserCircleIcon aria-hidden="true" className="h-12 w-12 text-gray-300 " />
                 )}

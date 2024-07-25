@@ -10,7 +10,7 @@ const ActivityCard = ({ activity }) => {
     date = '',
     title = '',
     description = '',
-    location = 'New York, NY',
+    location = '',
     duration = 0, // in seconds
     activity: activityName = '', // Rename the variable locally
     images = [], // These should be URLs
@@ -28,6 +28,7 @@ const ActivityCard = ({ activity }) => {
   const [commentText, setCommentText] = useState('');
   const [commentList, setCommentList] = useState(comments);
   const [commentUsers, setCommentUsers] = useState({});
+  const [streak, setStreak] = useState(0);
 
   const BASE_URL = 'http://127.0.0.1:8000';
 
@@ -51,6 +52,26 @@ const ActivityCard = ({ activity }) => {
 
     fetchUser();
   }, [user_id, getToken]);
+
+  useEffect(() => {
+    const fetchStreak = async () => {
+      try {
+        const response = await axios.get(`${BASE_URL}/progress/${user_id}`, {
+          headers: {
+            Authorization: `Bearer ${getToken()}`,
+          },
+        });
+        const progressData = response.data.find(prog => prog.activity === activityName);
+        if (progressData) {
+          setStreak(progressData.streak);
+        }
+      } catch (error) {
+        console.error('Error fetching streak:', error);
+      }
+    };
+
+    fetchStreak();
+  }, [user_id, activityName, getToken]);
 
   useEffect(() => {
     const fetchCommentUsers = async () => {
@@ -87,12 +108,19 @@ const ActivityCard = ({ activity }) => {
     return `${hours}h ${minutes}m`;
   };
 
+  const formatStreak = (streak) => {
+    if (streak > 7) {
+      return `${Math.floor(streak / 7)} wks`;
+    }
+    return `${streak} days`;
+  };
+
   const renderImages = () => {
     if (images.length === 1) {
       return (
         <div className="w-full h-64">
           <img
-            src={`${BASE_URL}/${images[0]}`}
+            src={images[0]}
             alt="Activity"
             className="w-full h-full object-cover rounded-sm cursor-pointer"
             onClick={() => openModal(0)}
@@ -105,7 +133,7 @@ const ActivityCard = ({ activity }) => {
         {images.map((url, index) => (
           <div key={index} className="relative w-full h-48">
             <img
-              src={`${BASE_URL}/${url}`}
+              src={url}
               alt={`Activity ${index}`}
               className="absolute inset-0 w-full h-full object-cover rounded-lg cursor-pointer"
               onClick={() => openModal(index)}
@@ -193,7 +221,7 @@ const ActivityCard = ({ activity }) => {
       <div className="flex justify-between items-start">
         <div className="flex items-center">
           {user?.profile_picture ? (
-            <img src={`${BASE_URL}/${user.profile_picture}`} alt="Profile" className="w-14 h-14 rounded-full object-cover" />
+            <img src={user.profile_picture} alt="Profile" className="w-14 h-14 rounded-full object-cover" />
           ) : (
             <div className="w-14 h-14 rounded-full bg-gray-200 flex items-center justify-center">
               <FontAwesomeIcon icon={faUser} className="text-gray-500" />
@@ -208,7 +236,7 @@ const ActivityCard = ({ activity }) => {
                 <div className="text-gray-600 text-xs flex justify-between items-center w-full">
                   <span>{new Date(date).toLocaleString('en-US', { month: 'long', day: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric' })}</span>
                   <div className="ml-1 border-l border-gray-300 h-4"></div>
-                  <span className="ml-1">{location}</span>
+                  <span className="ml-1">{user.location}</span>
                 </div>
               </>
             )}
@@ -231,7 +259,7 @@ const ActivityCard = ({ activity }) => {
           <div className="border-l border-gray-300 h-8"></div>
           <div className="flex flex-col items-center">
             <div className="text-gray-500 text-xs uppercase">Streak</div>
-            <div className="font-medium">3wks</div>
+            <div className="font-medium">{formatStreak(streak)}</div>
           </div>
         </div>
       </div>
@@ -246,7 +274,7 @@ const ActivityCard = ({ activity }) => {
           <div className="relative w-full max-w-screen-md p-4 mx-auto">
             <div className="relative w-full mx-auto flex items-center justify-center">
               <img
-                src={`${BASE_URL}/${images[currentImageIndex]}`}
+                src={images[currentImageIndex]}
                 alt="Activity"
                 className="rounded-lg transition-transform duration-300 max-h-screen max-w-full"
                 style={{ transform: `scale(${zoomLevel})`, maxWidth: '80%', maxHeight: '80%' }}
@@ -287,7 +315,7 @@ const ActivityCard = ({ activity }) => {
                 <div key={index} className="mb-2 flex items-start justify-between">
                   <div className="flex items-start">
                     {commentUser?.profile_picture ? (
-                      <img src={`${BASE_URL}/${commentUser.profile_picture}`} alt="Profile" className="w-8 h-8 rounded-full mr-2 object-cover" />
+                      <img src={commentUser.profile_picture} alt="Profile" className="w-8 h-8 rounded-full mr-2 object-cover" />
                     ) : (
                       <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center mr-2">
                         <FontAwesomeIcon icon={faUser} className="text-gray-500" />
@@ -305,7 +333,7 @@ const ActivityCard = ({ activity }) => {
           </div>
           <div className="flex items-center mt-4">
             {authUser?.profile_picture ? (
-              <img src={`${BASE_URL}/${authUser.profile_picture}`} alt="Profile" className="w-10 h-10 rounded-full mr-2 object-cover" />
+              <img src={authUser.profile_picture} alt="Profile" className="w-10 h-10 rounded-full mr-2 object-cover" />
             ) : (
               <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center mr-2 -ml-1">
                 <FontAwesomeIcon icon={faUser} className="text-gray-500" />

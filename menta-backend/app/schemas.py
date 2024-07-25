@@ -10,6 +10,7 @@ class UserCreate(BaseModel):
     dob: str
     interests: List[str]  
     profile_picture: Optional[str]
+    cover_photo: Optional[str]
     location: Optional[str]
     bio: Optional[str]
     clubs: Optional[List[str]] = []
@@ -24,6 +25,7 @@ class UserOut(BaseModel):
     dob: str
     interests: List[str] 
     profile_picture: Optional[str]
+    cover_photo: Optional[str]
     location: Optional[str]
     bio: Optional[str]
     clubs: Optional[List[str]] = []

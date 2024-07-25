@@ -15,6 +15,8 @@ from decouple import config
 import logging
 import requests
 from fastapi.staticfiles import StaticFiles
+import boto3
+import uuid
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 30  # 30 minutes
 
@@ -82,14 +84,14 @@ async def study_spots(request: StudySpotsRequest):
 @app.post("/check-email")
 async def check_email(email_check: EmailCheckRequest):
     existing_user = await get_user_by_email(email_check.email)
-    if existing_user:
+    if (existing_user):
         raise HTTPException(status_code=400, detail="Email already registered")
     return {"message": "Email is available"}
 
 @app.post("/register", response_model=UserOut)
 async def register_user(user: UserCreate):
     existing_user = await get_user_by_email(user.email)
-    if existing_user:
+    if (existing_user):
         raise HTTPException(status_code=400, detail="Email already registered")
     new_user = await create_user(user.dict())
     return new_user
@@ -182,14 +184,19 @@ async def upload_activity(
         end_time = start_datetime + timedelta(seconds=duration)
 
         image_urls = []
-        upload_directory = "uploads"
-        os.makedirs(upload_directory, exist_ok=True)
+        s3 = boto3.client(
+            "s3",
+            aws_access_key_id=config("AWS_ACCESS_KEY_ID"),
+            aws_secret_access_key=config("AWS_SECRET_ACCESS_KEY"),
+            region_name=config("AWS_DEFAULT_REGION")
+        )
+        BUCKET_NAME = config("S3_BUCKET_NAME")
 
         for file in files:
-            file_path = os.path.join(upload_directory, file.filename)
-            with open(file_path, "wb") as buffer:
-                buffer.write(file.file.read())
-            image_urls.append(file_path)
+            file_extension = file.filename.split(".")[-1]
+            file_key = f"{uuid.uuid4()}.{file_extension}"
+            s3.upload_fileobj(file.file, BUCKET_NAME, file_key, ExtraArgs={"ContentType": file.content_type})
+            image_urls.append(f"https://{BUCKET_NAME}.s3.amazonaws.com/{file_key}")
 
         activity_data = {
             "title": title,
@@ -210,17 +217,27 @@ async def upload_activity(
     except Exception as e:
         logger.error(f"Error in upload_activity: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
-    
+
 @app.post("/upload-images", response_model=List[str])
 async def upload_images(files: List[UploadFile] = File(...)):
-    image_urls = []
-    upload_directory = "uploads/"  # Ensure this directory exists
-    for file in files:
-        file_path = f"{upload_directory}{file.filename}"
-        with open(file_path, "wb") as f:
-            f.write(await file.read())
-        image_urls.append(f"/{file_path}")
-    return image_urls
+    try:
+        image_urls = []
+        s3 = boto3.client(
+            "s3",
+            aws_access_key_id=config("AWS_ACCESS_KEY_ID"),
+            aws_secret_access_key=config("AWS_SECRET_ACCESS_KEY"),
+            region_name=config("AWS_DEFAULT_REGION")
+        )
+        BUCKET_NAME = config("S3_BUCKET_NAME")
+        for file in files:
+            file_extension = file.filename.split(".")[-1]
+            file_key = f"{uuid.uuid4()}.{file_extension}"
+            s3.upload_fileobj(file.file, BUCKET_NAME, file_key, ExtraArgs={"ContentType": file.content_type})
+            image_urls.append(f"https://{BUCKET_NAME}.s3.amazonaws.com/{file_key}")
+        return image_urls
+    except Exception as e:
+        logger.error(f"Error uploading file: {e}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
 
 @app.get("/activities", response_model=List[ActivityOut])
 async def get_activities(current_user: UserOut = Depends(get_current_user)):
@@ -230,7 +247,7 @@ async def get_activities(current_user: UserOut = Depends(get_current_user)):
     except Exception as e:
         logger.error(f"Error in get_activities: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
-    
+
 @app.post("/activities/{activity_id}/comments", response_model=ActivityOut)
 async def add_comment(activity_id: str, comment: Comment, current_user: UserOut = Depends(get_current_user)):
     comment_data = comment.dict()
@@ -239,7 +256,7 @@ async def add_comment(activity_id: str, comment: Comment, current_user: UserOut 
     if updated_activity:
         return updated_activity
     raise HTTPException(status_code=400, detail="Unable to add comment")
-    
+
 @app.get("/activities/user/{user_id}", response_model=List[ActivityOut])
 async def get_user_activities(user_id: str, current_user: UserOut = Depends(get_current_user)):
     try:
@@ -253,7 +270,41 @@ async def get_user_activities(user_id: str, current_user: UserOut = Depends(get_
 async def get_user_progress(user_id: str, current_user: UserOut = Depends(get_current_user)):
     try:
         progress_entries = await progress_collection.find({"user_id": user_id}).to_list(100)
-        return [progress_helper(entry) for entry in progress_entries]
+
+        if not progress_entries:
+            return []
+
+        activity_summary = {}
+
+        for entry in progress_entries:
+            activity = entry['activity']
+            if activity not in activity_summary:
+                activity_summary[activity] = {
+                    "streak": 0,
+                    "total_time_spent": 0,
+                    "last_completed": None
+                }
+            activity_summary[activity]["streak"] = max(activity_summary[activity]["streak"], entry['streak'])
+            activity_summary[activity]["total_time_spent"] += entry['total_time_spent']
+            if activity_summary[activity]["last_completed"] is None or entry['last_completed'] > activity_summary[activity]["last_completed"]:
+                activity_summary[activity]["last_completed"] = entry['last_completed']
+
+        progress_out_list = []
+        for activity, summary in activity_summary.items():
+            progress_out_list.append(ProgressOut(
+                id=str(uuid.uuid4()),
+                user_id=user_id,
+                activity=activity,
+                streak=summary["streak"],
+                total_time_spent=summary["total_time_spent"],
+                last_completed=summary["last_completed"],
+                created_at=datetime.utcnow(),
+                updated_at=datetime.utcnow()
+            ))
+
+        return progress_out_list
+
     except Exception as e:
         logger.error(f"Error in get_user_progress: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
+
