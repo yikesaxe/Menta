@@ -15,6 +15,7 @@ function NavBar() {
   const [isMouseInsideHomeDropdown, setIsMouseInsideHomeDropdown] = useState(false);
   const [isMouseInsidePlusDropdown, setIsMouseInsidePlusDropdown] = useState(false);
   const [isMouseInsideProfileDropdown, setIsMouseInsideProfileDropdown] = useState(false);
+  const BASE_URL = 'http://127.0.0.1:8000';
 
   const handleLogout = () => {
     logout();
@@ -149,7 +150,7 @@ function NavBar() {
                   onMouseEnter={() => setIsProfileDropdownOpen(true)}
                 >
                   {user?.profile_picture ? (
-                    <img src={user.profile_picture} alt="Profile" className="w-8 h-8 rounded-full" />
+                    <img src={`${BASE_URL}/${user.profile_picture}`} alt="Profile" className="w-8 h-8 rounded-full object-cover" />
                   ) : (
                     <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
                       <FontAwesomeIcon icon={faUser} className="text-gray-500" />

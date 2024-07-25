@@ -68,3 +68,13 @@ async def add_comment_to_activity(activity_id: str, comment: dict):
         updated_activity = await activity_collection.find_one({"_id": ObjectId(activity_id)})
         return activity_helper(updated_activity)
     return None
+
+async def update_user(user_id, updated_data):
+    result = await user_collection.update_one(
+        {"_id": ObjectId(user_id)},
+        {"$set": updated_data}
+    )
+    if result.modified_count == 1:
+        updated_user = await user_collection.find_one({"_id": ObjectId(user_id)})
+        return user_helper(updated_user)
+    return None

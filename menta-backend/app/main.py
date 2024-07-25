@@ -7,7 +7,7 @@ from datetime import timedelta, datetime
 from typing import List
 from pydantic import BaseModel
 from app.schemas import Comment, UserCreate, UserOut, Token, ActivityCreate, ActivityOut, ProgressOut
-from app.crud import add_comment_to_activity, create_user, authenticate_user, create_activity
+from app.crud import add_comment_to_activity, create_user, authenticate_user, create_activity, update_user
 from app.auth import create_access_token, get_current_user
 from app.utils import get_user_by_email, get_user_by_id
 from app.database import activity_collection, progress_collection, progress_helper, activity_helper
@@ -16,8 +16,6 @@ import logging
 import requests
 from fastapi.staticfiles import StaticFiles
 
-
-
 ACCESS_TOKEN_EXPIRE_MINUTES = 30  # 30 minutes
 
 app = FastAPI()
@@ -25,8 +23,8 @@ app = FastAPI()
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 origins = [
-    "http://localhost:3000",  
-    "http://localhost:5173",  
+    "http://localhost:3000",
+    "http://localhost:5173",
 ]
 
 app.add_middleware(
@@ -47,7 +45,7 @@ class EmailCheckRequest(BaseModel):
 class StudySpotsRequest(BaseModel):
     lat: float
     lon: float
-    radius: int = 1000  
+    radius: int = 1000
 
 def fetch_osm_data(query: str):
     url = "http://overpass-api.de/api/interpreter"
@@ -74,7 +72,7 @@ async def study_spots(request: StudySpotsRequest):
         data = fetch_osm_data(query)
         logger.debug(f"Received OSM data: {data}")
         return data
-    except requests.RequestException as e:  # Corrected exception handling
+    except requests.RequestException as e:
         logger.error(f"RequestException in study_spots: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error: Unable to fetch data from Overpass API")
     except Exception as e:
@@ -84,7 +82,7 @@ async def study_spots(request: StudySpotsRequest):
 @app.post("/check-email")
 async def check_email(email_check: EmailCheckRequest):
     existing_user = await get_user_by_email(email_check.email)
-    if (existing_user):
+    if existing_user:
         raise HTTPException(status_code=400, detail="Email already registered")
     return {"message": "Email is available"}
 
@@ -126,6 +124,43 @@ async def get_user(user_id: str, current_user: UserOut = Depends(get_current_use
     except Exception as e:
         logger.error(f"Exception in get_user: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
+
+@app.put("/users/{user_id}", response_model=UserOut)
+async def update_user_profile(
+    user_id: str,
+    first_name: str = Form(...),
+    last_name: str = Form(...),
+    email: str = Form(...),
+    dob: str = Form(...),
+    interests: str = Form(...),
+    profile_picture: str = Form(None),
+    location: str = Form(None),
+    bio: str = Form(None),
+    cover_photo: str = Form(None),
+    current_user: UserOut = Depends(get_current_user)
+):
+    if current_user.id != user_id:
+        raise HTTPException(status_code=403, detail="Not authorized to update this user")
+
+    updated_data = {
+        "first_name": first_name,
+        "last_name": last_name,
+        "email": email,
+        "dob": dob,
+        "interests": interests.split(","),
+        "profile_picture": profile_picture,
+        "location": location,
+        "bio": bio,
+        "cover_photo": cover_photo,
+        "updated_at": datetime.utcnow()
+    }
+
+    logger.info(f"Received update request for user: {user_id} with data: {updated_data}")  # Logging for update
+
+    updated_user = await update_user(user_id, updated_data)
+    if updated_user:
+        return updated_user
+    raise HTTPException(status_code=400, detail="Unable to update user profile")
 
 @app.post("/activities", response_model=ActivityOut)
 async def upload_activity(

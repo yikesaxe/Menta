@@ -29,12 +29,12 @@ const ActivityCard = ({ activity }) => {
   const [commentList, setCommentList] = useState(comments);
   const [commentUsers, setCommentUsers] = useState({});
 
-  const BASE_URL = 'http://127.0.0.1:8000/';
+  const BASE_URL = 'http://127.0.0.1:8000';
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await axios.get(`http://127.0.0.1:8000/users/${user_id}`, {
+        const response = await axios.get(`${BASE_URL}/users/${user_id}`, {
           headers: {
             Authorization: `Bearer ${getToken()}`,
           },
@@ -61,7 +61,7 @@ const ActivityCard = ({ activity }) => {
       if (usersToFetch.length > 0) {
         const responses = await Promise.all(
           usersToFetch.map(userId =>
-            axios.get(`http://127.0.0.1:8000/users/${userId}`, {
+            axios.get(`${BASE_URL}/users/${userId}`, {
               headers: {
                 Authorization: `Bearer ${getToken()}`,
               },
@@ -92,7 +92,7 @@ const ActivityCard = ({ activity }) => {
       return (
         <div className="w-full h-64">
           <img
-            src={`${BASE_URL}${images[0]}`}
+            src={`${BASE_URL}/${images[0]}`}
             alt="Activity"
             className="w-full h-full object-cover rounded-sm cursor-pointer"
             onClick={() => openModal(0)}
@@ -105,7 +105,7 @@ const ActivityCard = ({ activity }) => {
         {images.map((url, index) => (
           <div key={index} className="relative w-full h-48">
             <img
-              src={`${BASE_URL}${url}`}
+              src={`${BASE_URL}/${url}`}
               alt={`Activity ${index}`}
               className="absolute inset-0 w-full h-full object-cover rounded-lg cursor-pointer"
               onClick={() => openModal(index)}
@@ -167,7 +167,7 @@ const ActivityCard = ({ activity }) => {
 
     try {
       await axios.post(
-        `http://127.0.0.1:8000/activities/${activity.id}/comments`,
+        `${BASE_URL}/activities/${activity.id}/comments`,
         newComment,
         {
           headers: {
@@ -193,7 +193,7 @@ const ActivityCard = ({ activity }) => {
       <div className="flex justify-between items-start">
         <div className="flex items-center">
           {user?.profile_picture ? (
-            <img src={user.profile_picture} alt="Profile" className="w-14 h-14 rounded-full" />
+            <img src={`${BASE_URL}/${user.profile_picture}`} alt="Profile" className="w-14 h-14 rounded-full object-cover" />
           ) : (
             <div className="w-14 h-14 rounded-full bg-gray-200 flex items-center justify-center">
               <FontAwesomeIcon icon={faUser} className="text-gray-500" />
@@ -246,7 +246,7 @@ const ActivityCard = ({ activity }) => {
           <div className="relative w-full max-w-screen-md p-4 mx-auto">
             <div className="relative w-full mx-auto flex items-center justify-center">
               <img
-                src={`${BASE_URL}${images[currentImageIndex]}`}
+                src={`${BASE_URL}/${images[currentImageIndex]}`}
                 alt="Activity"
                 className="rounded-lg transition-transform duration-300 max-h-screen max-w-full"
                 style={{ transform: `scale(${zoomLevel})`, maxWidth: '80%', maxHeight: '80%' }}
@@ -287,7 +287,7 @@ const ActivityCard = ({ activity }) => {
                 <div key={index} className="mb-2 flex items-start justify-between">
                   <div className="flex items-start">
                     {commentUser?.profile_picture ? (
-                      <img src={commentUser.profile_picture} alt="Profile" className="w-8 h-8 rounded-full mr-2" />
+                      <img src={`${BASE_URL}/${commentUser.profile_picture}`} alt="Profile" className="w-8 h-8 rounded-full mr-2 object-cover" />
                     ) : (
                       <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center mr-2">
                         <FontAwesomeIcon icon={faUser} className="text-gray-500" />
@@ -305,7 +305,7 @@ const ActivityCard = ({ activity }) => {
           </div>
           <div className="flex items-center mt-4">
             {authUser?.profile_picture ? (
-              <img src={authUser.profile_picture} alt="Profile" className="w-10 h-10 rounded-full mr-2" />
+              <img src={`${BASE_URL}/${authUser.profile_picture}`} alt="Profile" className="w-10 h-10 rounded-full mr-2 object-cover" />
             ) : (
               <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center mr-2 -ml-1">
                 <FontAwesomeIcon icon={faUser} className="text-gray-500" />
@@ -345,4 +345,3 @@ const ActivityCard = ({ activity }) => {
 };
 
 export default ActivityCard;
-
