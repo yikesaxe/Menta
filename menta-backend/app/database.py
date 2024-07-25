@@ -27,6 +27,7 @@ def user_helper(user) -> dict:
         "dob": user.get("dob"),  
         "interests": user["interests"],
         "profile_picture": user.get("profile_picture"), 
+        "cover_photo": user.get("cover_photo"),
         "location": user.get("location"), 
         "bio": user.get("bio"),  
         "clubs": user.get("clubs", []),
