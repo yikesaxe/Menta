@@ -1,22 +1,28 @@
-from fastapi import FastAPI, Depends, HTTPException, status
+import os
+from fastapi import FastAPI, Depends, File, Form, HTTPException, UploadFile, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from datetime import timedelta, datetime
 from typing import List
 from pydantic import BaseModel
-from app.schemas import UserCreate, UserOut, Token, ActivityCreate, ActivityOut, ProgressOut
-from app.crud import create_user, authenticate_user, create_activity
+from app.schemas import Comment, UserCreate, UserOut, Token, ActivityCreate, ActivityOut, ProgressOut
+from app.crud import add_comment_to_activity, create_user, authenticate_user, create_activity
 from app.auth import create_access_token, get_current_user
-from app.utils import get_user_by_email
+from app.utils import get_user_by_email, get_user_by_id
 from app.database import activity_collection, progress_collection, progress_helper, activity_helper
 from decouple import config
-
 import logging
 import requests
+from fastapi.staticfiles import StaticFiles
+
+
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 30  # 30 minutes
 
 app = FastAPI()
+
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 origins = [
     "http://localhost:3000",  
@@ -107,20 +113,79 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
 async def read_users_me(current_user: UserOut = Depends(get_current_user)):
     return current_user
 
+@app.get("/users/{user_id}", response_model=UserOut)
+async def get_user(user_id: str, current_user: UserOut = Depends(get_current_user)):
+    try:
+        user = await get_user_by_id(user_id)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        return user
+    except HTTPException as e:
+        logger.error(f"HTTPException in get_user: {e.detail}")
+        raise e
+    except Exception as e:
+        logger.error(f"Exception in get_user: {e}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+
 @app.post("/activities", response_model=ActivityOut)
-async def upload_activity(activity: ActivityCreate, current_user: UserOut = Depends(get_current_user)):
+async def upload_activity(
+    title: str = Form(...),
+    description: str = Form(...),
+    activity: str = Form(...),
+    date: str = Form(...),
+    start_time: str = Form(...),
+    duration: int = Form(...),
+    private_notes: str = Form(...),
+    privacy_type: str = Form(...),
+    perceived_performance: int = Form(...),
+    files: List[UploadFile] = File(...),
+    current_user: UserOut = Depends(get_current_user)
+):
     try:
         # Calculate end time
-        start_datetime = datetime.strptime(f"{activity.date} {activity.start_time}", "%Y-%m-%d %H:%M")
-        end_time = start_datetime + timedelta(seconds=activity.duration)
-        
-        activity_data = activity.dict()
-        activity_data["end_time"] = end_time.isoformat()
+        start_datetime = datetime.strptime(f"{date} {start_time}", "%Y-%m-%d %H:%M")
+        end_time = start_datetime + timedelta(seconds=duration)
+
+        image_urls = []
+        upload_directory = "uploads"
+        os.makedirs(upload_directory, exist_ok=True)
+
+        for file in files:
+            file_path = os.path.join(upload_directory, file.filename)
+            with open(file_path, "wb") as buffer:
+                buffer.write(file.file.read())
+            image_urls.append(file_path)
+
+        activity_data = {
+            "title": title,
+            "description": description,
+            "activity": activity,
+            "date": date,
+            "start_time": start_time,
+            "end_time": end_time.isoformat(),
+            "duration": duration,
+            "private_notes": private_notes,
+            "privacy_type": privacy_type,
+            "perceived_performance": perceived_performance,
+            "images": image_urls
+        }
+
         new_activity = await create_activity(activity_data, current_user.id)
         return new_activity
     except Exception as e:
         logger.error(f"Error in upload_activity: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
+    
+@app.post("/upload-images", response_model=List[str])
+async def upload_images(files: List[UploadFile] = File(...)):
+    image_urls = []
+    upload_directory = "uploads/"  # Ensure this directory exists
+    for file in files:
+        file_path = f"{upload_directory}{file.filename}"
+        with open(file_path, "wb") as f:
+            f.write(await file.read())
+        image_urls.append(f"/{file_path}")
+    return image_urls
 
 @app.get("/activities", response_model=List[ActivityOut])
 async def get_activities(current_user: UserOut = Depends(get_current_user)):
@@ -130,6 +195,15 @@ async def get_activities(current_user: UserOut = Depends(get_current_user)):
     except Exception as e:
         logger.error(f"Error in get_activities: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
+    
+@app.post("/activities/{activity_id}/comments", response_model=ActivityOut)
+async def add_comment(activity_id: str, comment: Comment, current_user: UserOut = Depends(get_current_user)):
+    comment_data = comment.dict()
+    comment_data["user_id"] = current_user.id
+    updated_activity = await add_comment_to_activity(activity_id, comment_data)
+    if updated_activity:
+        return updated_activity
+    raise HTTPException(status_code=400, detail="Unable to add comment")
     
 @app.get("/activities/user/{user_id}", response_model=List[ActivityOut])
 async def get_user_activities(user_id: str, current_user: UserOut = Depends(get_current_user)):

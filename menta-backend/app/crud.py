@@ -2,6 +2,7 @@ from app.database import user_collection, user_helper, activity_collection, acti
 from app.auth import get_password_hash, verify_password
 from datetime import datetime, timedelta
 from app.utils import get_user_by_email
+from bson import ObjectId
 
 async def create_user(user_data):
     user_data["hashed_password"] = get_password_hash(user_data["password"])
@@ -56,3 +57,14 @@ async def create_activity(activity_data, user_id):
         await progress_collection.insert_one(new_progress)
 
     return activity_helper(created_activity)
+
+async def add_comment_to_activity(activity_id: str, comment: dict):
+    comment["timestamp"] = datetime.utcnow()
+    result = await activity_collection.update_one(
+        {"_id": ObjectId(activity_id)},
+        {"$push": {"comments": comment}}
+    )
+    if result.modified_count == 1:
+        updated_activity = await activity_collection.find_one({"_id": ObjectId(activity_id)})
+        return activity_helper(updated_activity)
+    return None

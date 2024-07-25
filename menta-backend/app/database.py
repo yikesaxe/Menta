@@ -54,6 +54,7 @@ def activity_helper(activity) -> dict:
         "user_id": activity["user_id"],
         "created_at": activity["created_at"],
         "updated_at": activity["updated_at"],
+        "comments": activity.get("comments", [])
     }
 
 def progress_helper(progress) -> dict:

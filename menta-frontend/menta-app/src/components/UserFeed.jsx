@@ -35,21 +35,21 @@ function UserFeed() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 pt-16 flex m-1">
+    <div className="min-h-screen bg-gray-100 pt-16 px-4 grid grid-cols-12 gap-4 mt-2">
       {/* Left Sidebar */}
-      <div className="w-1/4 pr-2 pl-2 ml-1 mr-1">
+      <div className="col-span-3">
         {/* Content for the left sidebar */}
       </div>
 
       {/* Main Content */}
-      <div className="flex-grow pr-2 pl-2 overflow-y-auto ml-1 mr-1">
+      <div className="col-span-6 p-4 overflow-y-auto mx-8">
         {activities.map((activity) => (
           <ActivityCard key={activity.id} activity={activity} />
         ))}
       </div>
 
       {/* Right Sidebar */}
-      <div className="w-1/4 pr-2 pl-2 ml-1 mr-1">
+      <div className="col-span-3 p-4">
         {/* Content for the right sidebar */}
       </div>
     </div>

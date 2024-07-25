@@ -62,10 +62,7 @@ function UploadActivity() {
 
   const handleImageUpload = (event) => {
     const files = Array.from(event.target.files);
-    const newImages = files.slice(0, 5 - images.length).map((file) =>
-      URL.createObjectURL(file)
-    );
-    setImages((prevImages) => [...prevImages, ...newImages]);
+    setImages((prevImages) => [...prevImages, ...files]);
   };
 
   const removeImage = (image) => {
@@ -131,26 +128,26 @@ function UploadActivity() {
 
     const durationInSeconds = (parseInt(duration.hours) * 3600) + (parseInt(duration.minutes) * 60) + parseInt(duration.seconds);
 
-    const activityData = {
-      title,
-      description,
-      activity: selectedActivity,
-      date: currentDate,
-      start_time: currentTime,
-      duration: durationInSeconds,
-      private_notes,
-      privacy_type: selectedPrivacy,
-      perceived_performance: parseInt(perceived_performance),
-      images, // Make sure images is an array of strings (URLs)
-    };
+    const formData = new FormData();
+    formData.append('title', title);
+    formData.append('description', description);
+    formData.append('activity', selectedActivity);
+    formData.append('date', currentDate);
+    formData.append('start_time', currentTime);
+    formData.append('duration', durationInSeconds);
+    formData.append('private_notes', private_notes);
+    formData.append('privacy_type', selectedPrivacy);
+    formData.append('perceived_performance', parseInt(perceived_performance));
 
-    console.log("Sending activity data:", activityData);
+    images.forEach((image, index) => {
+      formData.append('files', image);
+    });
 
     try {
-      const response = await axios.post('http://127.0.0.1:8000/activities', activityData, {
+      const response = await axios.post('http://127.0.0.1:8000/activities', formData, {
         headers: {
           Authorization: `Bearer ${getToken()}`,
-          'Content-Type': 'application/json',
+          'Content-Type': 'multipart/form-data',
         },
       });
       console.log('Activity uploaded successfully:', response.data);
@@ -362,7 +359,7 @@ function UploadActivity() {
                 {images.map((image, index) => (
                   <div key={index} className="relative">
                     <img
-                      src={image}
+                      src={URL.createObjectURL(image)}
                       alt={`upload-${index}`}
                       className="h-24 w-24 rounded-md object-cover"
                     />

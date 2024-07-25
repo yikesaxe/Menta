@@ -37,6 +37,11 @@ class Token(BaseModel):
 class TokenData(BaseModel):
     email: Optional[str] = None
 
+class Comment(BaseModel):
+    user_id: str
+    text: str
+    timestamp: datetime
+
 class ActivityCreate(BaseModel):
     title: str
     description: Optional[str]
@@ -48,6 +53,7 @@ class ActivityCreate(BaseModel):
     privacy_type: str
     perceived_performance: Optional[int]
     images: Optional[List[str]] = []
+    comments: Optional[List[Comment]] = []
 
 class ActivityOut(BaseModel):
     id: str
@@ -63,6 +69,7 @@ class ActivityOut(BaseModel):
     perceived_performance: Optional[int]
     images: Optional[List[str]] = []
     user_id: str
+    comments: Optional[List[Comment]] = []
     created_at: datetime
     updated_at: datetime
 

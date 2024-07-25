@@ -25,6 +25,11 @@ class UserModel(BaseModel):
         json_encoders = {ObjectId: str}
         arbitrary_types_allowed = True
 
+class Comment(BaseModel):
+    user_id: str
+    text: str
+    timestamp: datetime
+
 class ActivityModel(BaseModel):
     id: Optional[str] = Field(alias="_id")
     title: str
@@ -39,6 +44,7 @@ class ActivityModel(BaseModel):
     perceived_performance: int
     images: List[str]
     user_id: str
+    comments: List[Comment] = []
     created_at: datetime
     updated_at: datetime
 
