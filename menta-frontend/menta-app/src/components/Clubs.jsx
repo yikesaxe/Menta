@@ -34,7 +34,7 @@ const Clubs = () => {
     <div>
       <NavBar />
       <div className="container mx-auto mt-10">
-        <h2 className="text-2xl font-bold mb-6 text-center">Clubs</h2>
+        <h2 className="text-2xl font-bold mb-6 text-center">Find Clubs Near You</h2>
         <div className="border border-gray-300 rounded-md p-10 shadow-lg">
           <div className="flex flex-col items-center">
             {/* Frame for input boxes, dropdown, and submit button */}
