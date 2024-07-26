@@ -130,6 +130,7 @@ async def get_user(user_id: str, current_user: UserOut = Depends(get_current_use
 @app.put("/users/{user_id}", response_model=UserOut)
 async def update_user_profile(
     user_id: str,
+    username: str,
     first_name: str = Form(...),
     last_name: str = Form(...),
     email: str = Form(...),
@@ -145,6 +146,7 @@ async def update_user_profile(
         raise HTTPException(status_code=403, detail="Not authorized to update this user")
 
     updated_data = {
+        "username": username,
         "first_name": first_name,
         "last_name": last_name,
         "email": email,
@@ -308,3 +310,68 @@ async def get_user_progress(user_id: str, current_user: UserOut = Depends(get_cu
         logger.error(f"Error in get_user_progress: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
+@app.get("/activities/latest", response_model=List[ActivityOut])
+async def get_latest_activities(current_user: UserOut = Depends(get_current_user)):
+    try:
+        activities = await activity_collection.find({"user_id": current_user.id}).sort("created_at", -1).limit(5).to_list(100)
+        return [activity_helper(activity) for activity in activities]
+    except Exception as e:
+        logger.error(f"Error in get_latest_activities: {e}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+    
+class FollowRequest(BaseModel):
+    target_user_id: str
+
+@app.post("/follow")
+async def follow_user(request: FollowRequest, current_user: UserOut = Depends(get_current_user)):
+    try:
+        target_user = await get_user_by_id(request.target_user_id)
+        if not target_user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        if current_user.id == request.target_user_id:
+            raise HTTPException(status_code=400, detail="Cannot follow yourself")
+
+        if current_user.id in target_user["followers"]:
+            raise HTTPException(status_code=400, detail="Already following this user")
+
+        # Update the target user's followers list
+        target_user["followers"].append(current_user.id)
+        await update_user(request.target_user_id, {"followers": target_user["followers"]})
+
+        # Update the current user's following list
+        current_user.following.append(request.target_user_id)
+        await update_user(current_user.id, {"following": current_user.following})
+
+        return {"message": "Successfully followed the user"}
+
+    except Exception as e:
+        logger.error(f"Error in follow_user: {e}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+
+@app.post("/unfollow")
+async def unfollow_user(request: FollowRequest, current_user: UserOut = Depends(get_current_user)):
+    try:
+        target_user = await get_user_by_id(request.target_user_id)
+        if not target_user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        if current_user.id == request.target_user_id:
+            raise HTTPException(status_code=400, detail="Cannot unfollow yourself")
+
+        if current_user.id not in target_user["followers"]:
+            raise HTTPException(status_code=400, detail="Not following this user")
+
+        # Update the target user's followers list
+        target_user["followers"].remove(current_user.id)
+        await update_user(request.target_user_id, {"followers": target_user["followers"]})
+
+        # Update the current user's following list
+        current_user.following.remove(request.target_user_id)
+        await update_user(current_user.id, {"following": current_user.following})
+
+        return {"message": "Successfully unfollowed the user"}
+
+    except Exception as e:
+        logger.error(f"Error in unfollow_user: {e}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")

@@ -66,7 +66,7 @@ const ProgressTracker = ({ userId }) => {
       days.push(
         <div key={date} className="relative w-6 h-6">
           <div 
-            className={`w-full h-full rounded-full ${isActive ? 'bg-gray-800' : 'bg-gray-200'}`} 
+            className={`w-full h-full rounded-full ${isActive ? 'bg-gray-800' : 'bg-blue-100'}`} 
             title={date}
           ></div>
           <div className={`absolute inset-0 flex items-center justify-center text-xs ${isActive ? 'text-transparent hover:text-white' : 'text-transparent hover:text-black'}`}>

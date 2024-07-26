@@ -48,7 +48,10 @@ function FeedPage() {
       return activity.privacy_type === 'Everyone';
     }
     if (filter === 'Followers') {
-      return activity.privacy_type === 'Followers' && user.following.includes(activity.user_id);
+      return (
+        activity.privacy_type === 'Everyone' ||
+        (activity.privacy_type === 'Followers' && user.following.includes(activity.user_id))
+      );
     }
     return false;
   };
@@ -76,7 +79,7 @@ function FeedPage() {
           </div>
           {isDropdownOpen && (
             <div
-              className="rounded-lg absolute z-10 w-1/4 bg-white shadow-lg overflow-auto max-h-48 "
+              className="rounded-lg absolute z-10 w-1/4 bg-white shadow-lg overflow-auto max-h-48"
               style={{ top: '100%' }}
             >
               <div>

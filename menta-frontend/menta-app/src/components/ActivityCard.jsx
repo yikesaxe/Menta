@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser, faTimes, faChevronLeft, faChevronRight, faSearchPlus, faSearchMinus, faThumbsUp, faShare, faComment } from '@fortawesome/free-solid-svg-icons';
+import { faUser, faTimes, faChevronLeft, faChevronRight, faSearchPlus, faSearchMinus, faThumbsUp, faShare, faComment, faLock } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from './AuthContext';
 import axios from 'axios';
 
 const ActivityCard = ({ activity }) => {
+  const navigate = useNavigate();
   const {
     user_id,
     date = '',
@@ -14,7 +16,8 @@ const ActivityCard = ({ activity }) => {
     duration = 0, // in seconds
     activity: activityName = '', // Rename the variable locally
     images = [], // These should be URLs
-    comments = [] // New field for comments
+    comments = [],
+    private_notes = '' // Private notes
   } = activity;
 
   const [user, setUser] = useState({ profile_picture: '', first_name: '', last_name: '' });
@@ -219,7 +222,7 @@ const ActivityCard = ({ activity }) => {
   return (
     <div className="relative bg-white shadow-sm pr-8 pt-4 pl-7 pb-10 mx-auto rounded-sm mb-8">
       <div className="flex justify-between items-start">
-        <div className="flex items-center">
+        <div className="flex items-center cursor-pointer" onClick={() => navigate(`/profile/${user_id}`)}>
           {user?.profile_picture ? (
             <img src={user.profile_picture} alt="Profile" className="w-14 h-14 rounded-full object-cover" />
           ) : (
@@ -246,6 +249,22 @@ const ActivityCard = ({ activity }) => {
       <div className="-mt-1 ml-18">
         <div className="font-semibold font-inter text-xl">{title}</div>
         <div className="text-sm text-gray-700 mt-2">{description}</div>
+        {authUser?.id === user_id && private_notes && (
+          <>
+          <div className="text-sm text-gray-500 mt-2 flex items-center">
+             <FontAwesomeIcon icon={faLock} className="mr-2" />
+             <div className="text-sm text-gray-400 mt-2">(Only you can see these notes)</div>
+          </div>
+          <span className="text-sm text-gray-500 items-center">My notes: {private_notes}</span>
+          </>
+          
+          // <div className="text-sm text-gray-500 mt-2 flex items-center">
+          //   <FontAwesomeIcon icon={faLock} className="mr-2" />
+          //   <span>My notes: {private_notes}</span>
+          //   <span className="ml-2 text-gray-400">(Only you can see these notes)</span>
+          // </div>
+          
+        )}
         <div className="flex items-center mt-4 space-x-6">
           <div className="flex flex-col items-center">
             <div className="text-gray-500 text-xs uppercase">Activity</div>
@@ -314,13 +333,15 @@ const ActivityCard = ({ activity }) => {
               return (
                 <div key={index} className="mb-2 flex items-start justify-between">
                   <div className="flex items-start">
-                    {commentUser?.profile_picture ? (
-                      <img src={commentUser.profile_picture} alt="Profile" className="w-8 h-8 rounded-full mr-2 object-cover" />
-                    ) : (
-                      <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center mr-2">
-                        <FontAwesomeIcon icon={faUser} className="text-gray-500" />
-                      </div>
-                    )}
+                    <Link to={`/profile/${comment.user_id}`}>
+                      {commentUser?.profile_picture ? (
+                        <img src={commentUser.profile_picture} alt="Profile" className="w-8 h-8 rounded-full mr-2 object-cover" />
+                      ) : (
+                        <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center mr-2">
+                          <FontAwesomeIcon icon={faUser} className="text-gray-500" />
+                        </div>
+                      )}
+                    </Link>
                     <div>
                       <div className="text-sm font-bold">{commentUser ? `${commentUser.first_name} ${commentUser.last_name}` : 'Unknown User'}</div>
                       <div className="text-xs">{comment.text}</div>

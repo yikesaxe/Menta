@@ -26,7 +26,7 @@ function App() {
               <Route path="/login" element={<LoginPage />} />
               <Route path="/feed" element={<FeedPage />} />
               <Route path="/upload-activity" element={<UploadActivity />} />
-              <Route path="/profile" element={<Profile />} />
+              <Route path="/profile/:userId" element={<Profile />} />
               <Route path="/settings" element={<SettingsPage />} />
               <Route path="/maps" element={<Map />} />
               <Route path="/userfeed" element={<UserFeed />} />
