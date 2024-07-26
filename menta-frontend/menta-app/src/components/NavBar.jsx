@@ -13,6 +13,7 @@ function NavBar() {
           <Link to="/feed" className="text-white">Feed</Link>
           <Link to="/profile" className="text-white">Profile</Link>
           <Link to="/settings" className="text-white">Settings</Link>
+          <Link to="/Clubs" className="text-white">Clubs</Link>
         </div>
       </div>
     </nav>
