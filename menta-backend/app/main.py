@@ -81,6 +81,7 @@ async def study_spots(request: StudySpotsRequest):
         logger.error(f"Exception in study_spots: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
+
 @app.post("/check-email")
 async def check_email(email_check: EmailCheckRequest):
     existing_user = await get_user_by_email(email_check.email)

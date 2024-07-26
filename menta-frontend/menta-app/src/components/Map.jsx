@@ -23,11 +23,11 @@ const Map = () => {
   const [radius, setRadius] = useState(1000); 
 
   useEffect(() => {
-    const fetchStudySpots = async () => {
+    const fetchStudySpots = async (lat, lon) => {
       try {
         const response = await axios.post('http://127.0.0.1:8000/api/study_spots', {
-          lat: position[0],
-          lon: position[1],
+          lat: lat,
+          lon: lon,
           radius: radius,
         });
         console.log(response.data.elements);
@@ -40,16 +40,17 @@ const Map = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          setPosition([position.coords.latitude, position.coords.longitude]);
-          fetchStudySpots();
+          const { latitude, longitude } = position.coords;
+          setPosition([latitude, longitude]);
+          fetchStudySpots(latitude, longitude);
         },
         (error) => {
           console.error('Error getting user location:', error);
-          fetchStudySpots();
+          fetchStudySpots(position[0], position[1]);
         }
       );
     } else {
-      fetchStudySpots();
+      fetchStudySpots(position[0], position[1]);
     }
   }, [radius]);
 
