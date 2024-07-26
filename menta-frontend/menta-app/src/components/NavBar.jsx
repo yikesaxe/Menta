@@ -99,7 +99,7 @@ function NavBar() {
                 >
                   <div className="">
                     <Link to="/userfeed" className="rounded-lg block px-4 py-2 hover:bg-gray-200">My Feed</Link>
-                    <Link to="/userclubs" className="rounded-lg block px-4 py-2 hover:bg-gray-200">My Clubs</Link>
+                    <Link to="/clubs" className="rounded-lg block px-4 py-2 hover:bg-gray-200">My Clubs</Link>
                     <Link to="/progress" className="rounded-lg block px-4 py-2 hover:bg-gray-200">My Tracker</Link>
                   </div>
                 </div>

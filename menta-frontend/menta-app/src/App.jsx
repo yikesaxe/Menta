@@ -12,6 +12,7 @@ import SettingsPage from './components/Settings';
 import Map from './components/Map';
 import UserFeed from './components/UserFeed';
 import Footer from './components/Footer'; 
+import Clubs from './components/Clubs';
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
               <Route path="/settings" element={<SettingsPage />} />
               <Route path="/maps" element={<Map />} />
               <Route path="/userfeed" element={<UserFeed />} />
+              <Route path="/clubs" element={<Clubs />} />
             </Routes>
           </div>
           <Footer /> 
