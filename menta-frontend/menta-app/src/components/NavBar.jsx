@@ -68,7 +68,7 @@ function NavBar() {
     <nav className="bg-white p-4 shadow fixed top-0 left-0 w-full z-10">
       <div className="container mx-auto flex justify-between items-center">
         <div className="flex items-center space-x-8">
-          <Link to="/" className={`text-blue-500 text-2xl font-bold ${getActiveClass('/')}`}>MENTA</Link>
+          <Link to="/" className={`text-starry text-2xl font-bold ${getActiveClass('/')}`}>MENTA</Link>
           {isLoggedIn && (
             <>
               <div 

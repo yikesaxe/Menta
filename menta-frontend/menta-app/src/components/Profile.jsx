@@ -111,7 +111,7 @@ const Profile = () => {
                 className="w-full h-full object-cover"
               />
             ) : (
-              <div className="w-full h-full bg-blue-100 flex items-center justify-center">
+              <div className="w-full h-full bg-starry-gradient flex items-center justify-center">
               </div>
             )}
             <div className="relative -top-18 left-48">
@@ -142,7 +142,7 @@ const Profile = () => {
               </div>
               {authUser.id !== userId && (
                 <button
-                  className={`relative -top-20 px-8 py-1 rounded shadow-md border ${isFollowing ? 'bg-gray-200 text-gray-700' : 'bg-blue-600 text-white'} hover:bg-blue-600 ${hoveringFollowButton && isFollowing ? 'hover:text-white' : ''}`}
+                  className={`relative -top-16 px-8 py-1 rounded shadow-md border ${isFollowing ? 'bg-gray-200 text-gray-700' : 'bg-blue-600 text-white'} hover:bg-blue-600 ${hoveringFollowButton && isFollowing ? 'hover:text-white' : ''}`}
                   onClick={isFollowing ? handleUnfollow : handleFollow}
                   onMouseEnter={handleMouseEnter}
                   onMouseLeave={handleMouseLeave}

@@ -8,6 +8,11 @@ export default {
     extend: {
       colors: {
         'website': '#f3f2f0',
+        'starry':'#302b63'
+      },
+      backgroundImage: {
+        'starry-gradient': 'linear-gradient(to right, #0f0c29, #302b63, #24243e)',
+        'starry-gradient-hover': 'linear-gradient(to right, #1a1a2e, #16213e, #0f3460)',
       },
       fontSize: {
         '35xl': ['2rem',{
@@ -27,6 +32,7 @@ export default {
         '23':'5.75rem',
         '22':'5.5rem',
         '34':'8.5rem',
+        '15' :'3.75rem',
       }
     },
   },

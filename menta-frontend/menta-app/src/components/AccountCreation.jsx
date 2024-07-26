@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 const interestsList = [
@@ -128,8 +128,93 @@ function AccountCreation() {
     });
   };
 
+  useEffect(() => {
+    const container = document.getElementById('background-container');
+    container.style.background = 'linear-gradient(to right, #0f0c29, #302b63, #24243e)'; // Initial space-themed background
+    for (let i = 0; i < 100; i++) {
+      const star = document.createElement('div');
+      star.className = 'star';
+      star.style.animation = `twinkle ${Math.random() * 5 + 5}s linear ${Math.random() * 1 + 1}s infinite`;
+      star.style.top = `${Math.random() * window.innerHeight}px`;
+      star.style.left = `${Math.random() * window.innerWidth}px`;
+      container.appendChild(star);
+    }
+  }, []);
+
+  const handleMouseEnter = () => {
+    const container = document.getElementById('background-container');
+    container.style.background = 'linear-gradient(to right, #0f0c29, #302b63, #24243e)';
+    container.style.backgroundSize = '200% 200%';
+    container.style.backgroundPosition = 'right center';
+    container.style.transition = 'background 0.3s ease-in-out, background-position 1s ease-in-out';
+    
+    const stars = document.getElementsByClassName('star');
+    for (let star of stars) {
+      star.style.top = `${Math.random() * window.innerHeight}px`;
+      star.style.left = `${Math.random() * window.innerWidth}px`;
+      star.style.transition = 'top 1s ease-in-out, left 1s ease-in-out';
+    }
+  };
+
+  const handleMouseLeave = () => {
+    const container = document.getElementById('background-container');
+    container.style.background = 'linear-gradient(to right, #0f0c29, #302b63, #24243e)';
+    container.style.backgroundSize = '200% 200%';
+    container.style.backgroundPosition = 'left center';
+    container.style.transition = 'background 0.3s ease-in-out, background-position 1.5s ease-in-out';
+    
+    const stars = document.getElementsByClassName('star');
+    for (let star of stars) {
+      star.style.top = `${Math.random() * window.innerHeight}px`;
+      star.style.left = `${Math.random() * window.innerWidth}px`;
+      star.style.transition = 'top 1.5s ease-in-out, left 1.5s ease-in-out';
+    }
+
+    setTimeout(() => {
+      container.style.background = 'linear-gradient(to right, #0f0c29, #302b63, #24243e)'; // Retain the space-themed background
+      container.style.backgroundSize = 'initial';
+      container.style.backgroundPosition = 'initial';
+    }, 1500); // Delay the background color reset to match the transition duration
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+    <div
+      id="background-container"
+      className="min-h-screen flex items-center justify-center relative overflow-hidden"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      <style>
+        {`
+          .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0);
+          }
+          @keyframes twinkle {
+            0% {
+              transform: scale(1, 1);
+              background: rgba(255, 255, 255, 0);
+              animation-timing-function: linear;
+            }
+            40% {
+              transform: scale(0.8, 0.8);
+              background: rgba(255, 255, 255, 1);
+              animation-timing-function: ease-out;
+            }
+            80% {
+              background: rgba(255, 255, 255, 0);
+              transform: scale(1, 1);
+            }
+            100% {
+              background: rgba(255, 255, 255, 0);
+              transform: scale(1, 1);
+            }
+          }
+        `}
+      </style>
       <div className="bg-white p-8 rounded shadow-md w-full max-w-md relative mt-12">
         {currentStep > 1 && (
           <button onClick={handleBackStep} className="absolute top-4 left-4 bg-gray-200 p-2 rounded-full">

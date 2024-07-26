@@ -1,3 +1,4 @@
+import math
 import os
 from fastapi import FastAPI, Depends, File, Form, HTTPException, UploadFile, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -10,7 +11,7 @@ from app.schemas import Comment, UserCreate, UserOut, Token, ActivityCreate, Act
 from app.crud import add_comment_to_activity, create_user, authenticate_user, create_activity, update_user
 from app.auth import create_access_token, get_current_user
 from app.utils import get_user_by_email, get_user_by_id
-from app.database import activity_collection, progress_collection, progress_helper, activity_helper
+from app.database import user_collection, activity_collection, progress_collection, progress_helper, activity_helper, user_helper
 from decouple import config
 import logging
 import requests
@@ -41,13 +42,33 @@ app.add_middleware(
 logger = logging.getLogger("uvicorn")
 logger.setLevel(logging.ERROR)
 
+class User(BaseModel):
+    id: str
+    first_name: str
+    last_name: str
+    email: str
+    dob: str = None
+    interests: List[str] = []
+    profile_picture: str = None
+    cover_photo: str = None
+    location: str = None
+    bio: str = None
+    clubs: List[str] = []
+    followers: List[str] = []
+    following: List[str] = []
+    hashed_password: str
+    created_at: str
+    updated_at: str
+
 class EmailCheckRequest(BaseModel):
     email: str
 
+class Bounds(BaseModel):
+    southwest: List[float]
+    northeast: List[float]
+
 class StudySpotsRequest(BaseModel):
-    lat: float
-    lon: float
-    radius: int = 1000
+    bounds: Bounds
 
 def fetch_osm_data(query: str):
     url = "http://overpass-api.de/api/interpreter"
@@ -57,9 +78,15 @@ def fetch_osm_data(query: str):
 
 @app.post("/api/study_spots")
 async def study_spots(request: StudySpotsRequest):
-    lat = request.lat
-    lon = request.lon
-    radius = request.radius
+    southwest = request.bounds.southwest
+    northeast = request.bounds.northeast
+
+    # Calculate the center point
+    lat = (southwest[0] + northeast[0]) / 2
+    lon = (southwest[1] + northeast[1]) / 2
+
+    # Calculate the radius as the distance between southwest and northeast corners (approximation)
+    radius = 1000  # default value if you have any other means to calculate radius
 
     query = f"""
     [out:json];
@@ -80,8 +107,7 @@ async def study_spots(request: StudySpotsRequest):
     except Exception as e:
         logger.error(f"Exception in study_spots: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
-
-
+    
 @app.post("/check-email")
 async def check_email(email_check: EmailCheckRequest):
     existing_user = await get_user_by_email(email_check.email)
@@ -373,4 +399,13 @@ async def unfollow_user(request: FollowRequest, current_user: UserOut = Depends(
 
     except Exception as e:
         logger.error(f"Error in unfollow_user: {e}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+    
+@app.get("/users", response_model=List[UserOut])
+async def get_all_users(current_user: UserOut = Depends(get_current_user)):
+    try:
+        users = await user_collection.find().to_list(100)  # Fetch all users
+        return [user_helper(user) for user in users]
+    except Exception as e:
+        logger.error(f"Error in get_all_users: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
