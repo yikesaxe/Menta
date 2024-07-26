@@ -2,13 +2,14 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useAuth } from './AuthContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faWalking, faBiking, faSkating, faBook } from '@fortawesome/free-solid-svg-icons';
+import { faPen, faChessBishop, faPuzzlePiece, faBook, faLaptop } from '@fortawesome/free-solid-svg-icons';
 
 const activityIcons = {
-  walking: faWalking,
-  biking: faBiking,
-  swimming: faSkating,
-  reading: faBook
+  Writing: faPen,
+  Chess: faChessBishop,
+  Puzzles: faPuzzlePiece,
+  Reading: faBook,
+  Coding: faLaptop
 };
 
 const ProgressTracker = ({ userId }) => {
@@ -17,21 +18,36 @@ const ProgressTracker = ({ userId }) => {
   const [totalActivities, setTotalActivities] = useState(0);
   const [activityDurations, setActivityDurations] = useState({});
   const [calendarData, setCalendarData] = useState([]);
+  const [interests, setInterests] = useState([]);
 
   useEffect(() => {
     const fetchProgress = async () => {
       try {
         const token = getToken();
-        const response = await axios.get(`http://127.0.0.1:8000/progress/${userId}`, {
+
+        // Fetch user interests
+        const userResponse = await axios.get(`http://127.0.0.1:8000/users/${userId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        const activitiesData = response.data;
+        const userInterests = userResponse.data.interests;
+        setInterests(userInterests);
+
+        // Initialize activityDurations with all interests set to 0
+        const initialDurations = {};
+        userInterests.forEach(interest => {
+          initialDurations[interest] = 0;
+        });
+
+        const progressResponse = await axios.get(`http://127.0.0.1:8000/progress/${userId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const activitiesData = progressResponse.data;
         setActivities(activitiesData);
 
         const totalActivitiesCount = activitiesData.length;
         setTotalActivities(totalActivitiesCount);
 
-        const durations = {};
+        const durations = { ...initialDurations };
         const calendar = {};
 
         activitiesData.forEach(activity => {

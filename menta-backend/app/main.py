@@ -130,7 +130,6 @@ async def get_user(user_id: str, current_user: UserOut = Depends(get_current_use
 @app.put("/users/{user_id}", response_model=UserOut)
 async def update_user_profile(
     user_id: str,
-    username: str,
     first_name: str = Form(...),
     last_name: str = Form(...),
     email: str = Form(...),
@@ -146,7 +145,6 @@ async def update_user_profile(
         raise HTTPException(status_code=403, detail="Not authorized to update this user")
 
     updated_data = {
-        "username": username,
         "first_name": first_name,
         "last_name": last_name,
         "email": email,
